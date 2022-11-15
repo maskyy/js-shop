@@ -17,11 +17,10 @@
 
   const DATA_URL = 'https://main-shop-fake-server.herokuapp.com/db';
   const MAX_PHOTOS = 5;
+
   const products = (await fetchJson(DATA_URL)).products;
-  //console.log(data);
   const resultsList = document.querySelector('.results__list');
   const favTemplate = document.getElementById('fav-button').content.children[0];
-  console.log(favTemplate);
 
   const makeElement = (tag, className, text) => {
     const el = document.createElement(tag);
@@ -119,6 +118,19 @@
     return result;
   }
 
+  const addContentElements = ({name, price, address}, date) => {
+    const result = [];
+    result.push(makeElement('h3', 'product__title'));
+    result[0].appendChild(makeElement('a', '', name));
+
+    // TODO format all 3
+    result.push(makeElement('div', 'product__price', price));
+    result.push(makeElement('div', 'product__address', address.city));
+    result.push(makeElement('div', 'product__date', date));
+
+    return result;
+  }
+
   const addProduct = data => {
     const li = makeElement('li', 'results__item product');
   
@@ -127,6 +139,8 @@
     const image = makeElement('div', 'product__image');
     addImageElements(data).forEach(el => image.appendChild(el));
     const content = makeElement('div', 'product__content');
+    const publish_date = data['publish-date'];
+    addContentElements(data, publish_date).forEach(el => content.appendChild(el));
 
     [fav, image, content].forEach(el => li.appendChild(el));
 
