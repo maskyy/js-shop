@@ -41,7 +41,9 @@
   }
 
   const createFavButton = () => {
-
+    const fav = favTemplate.cloneNode(true);
+    fav.addEventListener('click', onFavClick);
+    return fav;
   }
 
   const onFavClick = e => {
@@ -120,8 +122,7 @@
   const addProduct = data => {
     const li = makeElement('li', 'results__item product');
   
-    const fav = favTemplate.cloneNode(true);
-    fav.addEventListener('click', onFavClick);
+    const fav = createFavButton();
   
     const image = makeElement('div', 'product__image');
     addImageElements(data).forEach(el => image.appendChild(el));
