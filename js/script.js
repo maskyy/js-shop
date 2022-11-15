@@ -63,7 +63,7 @@
     return img;
   }
 
-  const onNavItemClick = (e, active, photos, len) => {
+  const onNavItemOver = (e, active, photos, len) => {
     e.preventDefault();
 
     photos.slice(0, len).forEach(p => p.classList.add('hidden'));
@@ -87,10 +87,10 @@
 
     photoElements.forEach((_, i) => {
       const navItem = makeElement('span', 'product__navigation-item');
-      navItem.addEventListener('click', e => onNavItemClick(e, i, photoElements, photosLen));
+      navItem.addEventListener('mouseover', e => onNavItemOver(e, i, photoElements, photosLen));
       navigation.appendChild(navItem);
     });
-    navigation.addEventListener('click', highlightNavItem);
+    navigation.addEventListener('mouseover', highlightNavItem);
     navigation.children[0].classList.add('product__navigation-item--active');
 
     return navigation;
