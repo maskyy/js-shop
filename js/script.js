@@ -82,8 +82,6 @@
     setAttributes(img, {
       src: photo,
       alt: name,
-      width: 318,
-      height: 220
     });
     return img;
   }
@@ -134,9 +132,9 @@
       const navigation = result.at(-1);
       const navItems = Array.from(navigation.children);
       navItems.slice(0, navItems.length - 1).forEach(item => {
-        item.addEventListener('click', () => morePhotos.classList.add('hidden'));
+        item.addEventListener('mouseover', () => morePhotos.classList.add('hidden'));
       })
-      navItems.at(-1).addEventListener('click', () => morePhotos.classList.remove('hidden'));
+      navItems.at(-1).addEventListener('mouseover', () => morePhotos.classList.remove('hidden'));
 
       result.push(morePhotos);
     }
