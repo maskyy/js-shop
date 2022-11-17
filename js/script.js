@@ -6,6 +6,20 @@
       return data;
   }
 
+  const addPopupData = index => {
+    const data = products[index];
+    console.log(data);
+  }
+
+  const openPopup = (e, index) => {
+    e.preventDefault();
+
+    addPopupData(index);
+    popup.classList.add('popup--active');
+  }
+
+  const closePopup = e => popup.classList.remove('popup--active');
+
   const mySlider = new rSlider({
     target: '#sampleSlider',
     values: {min: 10000, max: 1000000},
@@ -30,6 +44,10 @@
   const products = (await fetchJson(DATA_URL)).products;
   const resultsList = document.querySelector('.results__list');
   const favTemplate = document.getElementById('fav-button').content.children[0];
+
+  const popup = document.querySelector('.popup');
+  const popupClose = popup.querySelector('.popup__close');
+  popupClose.addEventListener('click', closePopup);
 
   const makeElement = (tag, className, text) => {
     const el = document.createElement(tag);
@@ -83,6 +101,7 @@
       src: photo,
       alt: name,
     });
+
     return img;
   }
 
@@ -172,8 +191,9 @@
   const addContentElements = ({name, price, address}, date) => {
     const result = [];
     result.push(makeElement('h3', 'product__title'));
-    result[0].appendChild(makeElement('a', '', name));
-    result[0].href = '#';
+    const title = makeElement('a', '', name);
+    title.href = '#';
+    result[0].appendChild(title);
 
     const data = [
       ['product__price', formatPrice, price],
@@ -187,16 +207,20 @@
     return result;
   }
 
-  const addProduct = data => {
+  const addProduct = (data, index) => {
     const li = makeElement('li', 'results__item product');
   
     const fav = createFavButton();
   
     const image = makeElement('div', 'product__image');
     addImageElements(data).forEach(el => image.appendChild(el));
+    Array.from(image.getElementsByTagName('img')).forEach(el => {
+      el.addEventListener('click', e => openPopup(e, index));
+    });
     const content = makeElement('div', 'product__content');
     const publish_date = data['publish-date'];
     addContentElements(data, publish_date).forEach(el => content.appendChild(el));
+    content.querySelector('h3').addEventListener('click', e => openPopup(e, index));
 
     [fav, image, content].forEach(el => li.appendChild(el));
 
@@ -205,7 +229,7 @@
 
   const test = () => {
     resultsList.innerHTML = '';
-    products.forEach(item => resultsList.appendChild(addProduct(item)));
+    products.forEach((item, i) => resultsList.appendChild(addProduct(item, i)));
   }
   console.log(products);
   test();
