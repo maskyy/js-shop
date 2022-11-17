@@ -5,6 +5,7 @@
       const data = await response.json();
       return data;
   }
+
   const mySlider = new rSlider({
     target: '#sampleSlider',
     values: {min: 10000, max: 1000000},
@@ -17,6 +18,14 @@
 
   const DATA_URL = 'https://main-shop-fake-server.herokuapp.com/db';
   const MAX_PHOTOS = 5;
+  const CURRENCY_FORMAT = new Intl.NumberFormat('ru-RU', {
+    style: 'currency',
+    currency: 'RUB',
+    maximumFractionDigits: 0
+  });
+  const DATE_FORMAT = new Intl.DateTimeFormat('ru-RU', {
+    dateStyle: 'long'
+  });
 
   const products = (await fetchJson(DATA_URL)).products;
   const resultsList = document.querySelector('.results__list');
@@ -37,6 +46,23 @@
     for (const k in attributes) {
         el.setAttribute(k, attributes[k]);
     }
+  }
+
+  const getPlural = (number, one, two, many) => {
+    number = Math.floor(number);
+    const mod10 = number % 10, mod100 = number % 100;
+
+    if ((mod100 >= 11 && mod100 <= 20) || mod10 > 5) {
+      return many;
+    }
+    if (mod10 === 1) {
+      return one;
+    }
+    if (mod10 >= 2 && mod10 <= 4) {
+      return two;
+    }
+
+    return many;
   }
 
   const createFavButton = () => {
@@ -118,15 +144,47 @@
     return result;
   }
 
+  const formatPrice = price => CURRENCY_FORMAT.format(price);
+
+  const formatAddress = address => {
+    let result = address.city;
+    if (address.street) {
+      result += ', ' + address.street;
+    }
+    return result;
+  }
+
+  const formatDate = timestamp => {
+    const dayDiff = (Date.now() - timestamp) / (24 * 60 * 60 * 1000);
+    if (dayDiff < 1) {
+      const hours = Math.floor(dayDiff / 24);
+      return `${hours} ${getPlural(hours, 'час', 'часа', 'часов')} назад`;
+    }
+    if (dayDiff < 7) {
+      const days = Math.floor(dayDiff);
+      return `${days} ${getPlural(days, 'день', 'дня', 'дней')} назад`;
+    }
+    let fullDate = DATE_FORMAT.format(timestamp).slice(0, -3);
+    if (fullDate.endsWith(new Date().getFullYear())) {
+      fullDate = fullDate.slice(0, -5);
+    }
+    return fullDate;
+  }
+
   const addContentElements = ({name, price, address}, date) => {
     const result = [];
     result.push(makeElement('h3', 'product__title'));
     result[0].appendChild(makeElement('a', '', name));
+    result[0].href = '#';
 
-    // TODO format all 3
-    result.push(makeElement('div', 'product__price', price));
-    result.push(makeElement('div', 'product__address', address.city));
-    result.push(makeElement('div', 'product__date', date));
+    const data = [
+      ['product__price', formatPrice, price],
+      ['product__address', formatAddress, address],
+      ['product__date', formatDate, date],
+    ];
+    data.forEach(item => {
+      result.push(makeElement('div', item[0], item[1](item[2])));
+    });
 
     return result;
   }
