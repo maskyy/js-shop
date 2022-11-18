@@ -133,6 +133,10 @@
   border-radius: 4px;
 }
 
+#map {
+  height: 180px;
+}
+
 .popup__address {
   position: relative;
   padding-left: 26px;

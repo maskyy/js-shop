@@ -6,15 +6,21 @@
       return data;
   }
 
+  const initMap = () => {
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    }).addTo(map);
+  }
+
   const updateItem = (selector, text) => {
     popup.querySelector(selector).textContent = text;
   }
 
-  const updateMap = ([lat, lng]) => {
-    map = new google.maps.Map(map, {
-      center: {lat, lng},
-      zoom: 15
-    });
+  const updateMap = ([lat, lng], address) => {
+    map.setView({lat, lng}, 15);
+    mapMarker = L.marker({lat, lng}).addTo(map);
+    mapMarker.bindPopup(address);
   }
 
   const updatePopup = product => {
@@ -22,8 +28,9 @@
     updateItem('.popup__title', product.name);
     updateItem('.popup__price', formatPrice(product.price));
     updateItem('.popup__description > p', product.description);
-    updateItem('.popup__address', Object.values(product.address).join(', '));
-    updateMap(product.coordinates);
+    const addr = Object.values(product.address).join(', ')
+    updateItem('.popup__address', addr);
+    updateMap(product.coordinates, addr);
   }
 
   const openPopup = (e, index) => {
@@ -33,7 +40,10 @@
     popup.classList.add('popup--active');
   }
 
-  const closePopup = e => popup.classList.remove('popup--active');
+  const closePopup = e => {
+    mapMarker.remove();
+    popup.classList.remove('popup--active');
+  }
 
   const mySlider = new rSlider({
     target: '#sampleSlider',
@@ -59,7 +69,8 @@
   const products = (await fetchJson(DATA_URL)).products;
   const resultsList = document.querySelector('.results__list');
   const favTemplate = document.getElementById('fav-button').content.children[0];
-  let map = document.getElementById('map');
+  const map = L.map('map');
+  let mapMarker;
 
   const popup = document.querySelector('.popup');
   const popupClose = popup.querySelector('.popup__close');
@@ -250,4 +261,5 @@
   popupClose.addEventListener('click', closePopup);
   console.log(products);
   test();
+  initMap();
 })();
