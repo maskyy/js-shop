@@ -6,15 +6,30 @@
       return data;
   }
 
-  const addPopupData = index => {
-    const data = products[index];
-    console.log(data);
+  const updateItem = (selector, text) => {
+    popup.querySelector(selector).textContent = text;
+  }
+
+  const updateMap = ([lat, lng]) => {
+    map = new google.maps.Map(map, {
+      center: {lat, lng},
+      zoom: 15
+    });
+  }
+
+  const updatePopup = product => {
+    updateItem('.popup__date', formatDate(product['publish-date']));
+    updateItem('.popup__title', product.name);
+    updateItem('.popup__price', formatPrice(product.price));
+    updateItem('.popup__description > p', product.description);
+    updateItem('.popup__address', Object.values(product.address).join(', '));
+    updateMap(product.coordinates);
   }
 
   const openPopup = (e, index) => {
     e.preventDefault();
 
-    addPopupData(index);
+    updatePopup(products[index]);
     popup.classList.add('popup--active');
   }
 
@@ -44,10 +59,10 @@
   const products = (await fetchJson(DATA_URL)).products;
   const resultsList = document.querySelector('.results__list');
   const favTemplate = document.getElementById('fav-button').content.children[0];
+  let map = document.getElementById('map');
 
   const popup = document.querySelector('.popup');
   const popupClose = popup.querySelector('.popup__close');
-  popupClose.addEventListener('click', closePopup);
 
   const makeElement = (tag, className, text) => {
     const el = document.createElement(tag);
@@ -231,6 +246,8 @@
     resultsList.innerHTML = '';
     products.forEach((item, i) => resultsList.appendChild(addProduct(item, i)));
   }
+
+  popupClose.addEventListener('click', closePopup);
   console.log(products);
   test();
 })();
