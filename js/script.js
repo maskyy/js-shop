@@ -17,10 +17,32 @@
     popup.querySelector(selector).textContent = text;
   }
 
-  const updateMap = ([lat, lng], address) => {
-    map.setView({lat, lng}, 15);
-    mapMarker = L.marker({lat, lng}).addTo(map);
+  const updateMap = ({coordinates}, address) => {
+    map.setView(coordinates, 15);
+    mapMarker = L.marker(coordinates).addTo(map);
     mapMarker.bindPopup(address);
+  }
+
+  const updateSellerIcon = rating => {
+    const seller = popup.querySelector('.seller');
+    const levels = {
+      good: 'seller--good',
+      bad: 'seller--bad',
+    };
+    Object.values(levels).forEach(x => seller.classList.remove(x));
+    if (rating >= 4.8) {
+      seller.classList.add(levels.good);
+    } else if (rating < 4) {
+      seller.classList.add(levels.bad);
+    }
+  }
+
+  const updateGallery = ({photos}) => {
+    console.log(photos);
+  }
+
+  const updateChars = ({filters}) => {
+    console.log(filters);
   }
 
   const updatePopup = product => {
@@ -28,9 +50,16 @@
     updateItem('.popup__title', product.name);
     updateItem('.popup__price', formatPrice(product.price));
     updateItem('.popup__description > p', product.description);
-    const addr = Object.values(product.address).join(', ')
+    const addr = Object.values(product.address).join(', ');
     updateItem('.popup__address', addr);
-    updateMap(product.coordinates, addr);
+    updateMap(product, addr);
+
+    updateItem('.seller__name', product.seller.fullname);
+    updateItem('.seller__rating > span', RATING_FORMAT.format(product.seller.rating));
+    updateSellerIcon(product.seller.rating);
+
+    updateGallery(product);
+    updateChars(product);
   }
 
   const openPopup = (e, index) => {
@@ -61,6 +90,10 @@
     style: 'currency',
     currency: 'RUB',
     maximumFractionDigits: 0
+  });
+  const RATING_FORMAT = new Intl.NumberFormat('en-US', {
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1
   });
   const DATE_FORMAT = new Intl.DateTimeFormat('ru-RU', {
     dateStyle: 'long'
