@@ -37,7 +37,48 @@
     }
   }
 
-  const updateGallery = ({photos}) => {
+  const addPopupImage = (alt, src, width, height) => {
+    const img = document.createElement('img');
+    setAttributes(img, {
+      src,
+      alt,
+      width,
+      height,
+    });
+    return img;
+  }
+
+  const selectPopupImage = (e, items, main) => {
+    e.preventDefault();
+
+    const img = e.target;
+    items.forEach(el => el.classList.remove('gallery__item--active'));
+    img.parentNode.classList.add('gallery__item--active');
+    main.src = img.src;
+  }
+
+  const updateGallery = ({name, photos}) => {
+    const mainContainer = popup.querySelector('.gallery__main-pic');
+    const gallery = popup.querySelector('.gallery__list');
+    mainContainer.innerHTML = gallery.innerHTML = '';
+
+    const mainPic = addPopupImage(name, photos[0], 520, 340);
+    mainContainer.appendChild(mainPic);
+
+    let galleryItems = [];
+    photos.forEach((p, i) => {
+      const li = makeElement('li', 'gallery__item');
+      const img = addPopupImage(name, p, 124, 80);
+      li.appendChild(img);
+      galleryItems.push(li);
+    });
+    galleryItems[0].classList.add('gallery__item--active');
+
+    galleryItems.forEach(el => {
+      el.addEventListener('click', e => selectPopupImage(e, galleryItems, mainPic));
+      gallery.appendChild(el);
+    });
+
     console.log(photos);
   }
 
