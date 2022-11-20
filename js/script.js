@@ -78,12 +78,32 @@
       el.addEventListener('click', e => selectPopupImage(e, galleryItems, mainPic));
       gallery.appendChild(el);
     });
+  }
 
-    console.log(photos);
+  const addCharItem = (name, value) => {
+    const li = makeElement('li', 'chars__item');
+    li.appendChild(makeElement('div', 'chars__name', name));
+    li.appendChild(makeElement('div', 'chars__value', value));
+    return li;
   }
 
   const updateChars = ({filters}) => {
     console.log(filters);
+
+    const chars = popup.querySelector('.chars');
+    chars.innerHTML = '';
+    Object.entries(filters).forEach(([k, v]) => {
+      if (v === '-') {
+        return;
+      }
+      if (k in CHARS_TYPES) {
+        k = CHARS_TYPES[k];
+      }
+      if (v in CHARS_NAMES) {
+        v = CHARS_NAMES[v];
+      }
+      chars.appendChild(addCharItem(k, v));
+    });
   }
 
   const updatePopup = product => {
@@ -139,6 +159,60 @@
   const DATE_FORMAT = new Intl.DateTimeFormat('ru-RU', {
     dateStyle: 'long'
   });
+  const CHARS_TYPES = {
+    // Недвижимость
+    type: 'Тип',
+    area: 'Площадь',
+    'rooms-count': 'Кол-во комнат',
+
+    // Ноутбуки (тип выше)
+    'ram-value': 'ОЗУ (Гб)',
+    'screen-size': 'Диагональ',
+    'cpu-type': 'Тип ЦП',
+
+    // Фотоаппараты (тип выше)
+    'matrix-resolution': 'Разрешение матрицы',
+    supporting: 'Разрешение видео',
+
+    // Автомобили
+    'production-year': 'Год выпуска',
+    transmission: 'Коробка передач',
+    'body-type': 'Тип кузова',
+  };
+
+  // Значение '-' добавлять не нужно
+  const CHARS_NAMES = {
+    // Недвижимость
+    flat: 'Квартира',
+    apartment: 'Апартаменты',
+    house: 'Дом',
+
+    // Ноутбуки
+    i3: 'Intel Core i3',
+    i5: 'Intel Core i5',
+    i7: 'Intel Core i7',
+
+    // Фотоаппараты
+    // Тип
+    slr: 'Зеркальный',
+    digital: 'Цифровой',
+    mirrorless: 'Беззеркальный',
+  
+    // Разрешение
+    hd: 'HD',
+    'full-hd': 'Full HD',
+
+    // Автомобили
+    // Коробка передач
+    auto: 'Автомат',
+    mechanic: 'Механика',
+    // Тип кузова
+    sedan: 'Седан',
+    universal: 'Универсал',
+    hatchback: 'Хэтчбэк',
+    suv: 'Внедорожник',
+    coupe: 'Купэ',
+  };
 
   const products = (await fetchJson(DATA_URL)).products;
   const resultsList = document.querySelector('.results__list');
