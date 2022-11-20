@@ -96,12 +96,9 @@
       if (v === '-') {
         return;
       }
-      if (k in CHARS_TYPES) {
-        k = CHARS_TYPES[k];
-      }
-      if (v in CHARS_NAMES) {
-        v = CHARS_NAMES[v];
-      }
+      const suffix = k in CHARS_SUFFIXES ? CHARS_SUFFIXES[k] : '';
+      k = k in CHARS_TYPES ? CHARS_TYPES[k] : k;
+      v = (v in CHARS_NAMES ? CHARS_NAMES[v] : v) + suffix;
       chars.appendChild(addCharItem(k, v));
     });
   }
@@ -166,7 +163,7 @@
     'rooms-count': 'Кол-во комнат',
 
     // Ноутбуки (тип выше)
-    'ram-value': 'ОЗУ (Гб)',
+    'ram-value': 'ОЗУ',
     'screen-size': 'Диагональ',
     'cpu-type': 'Тип ЦП',
 
@@ -214,6 +211,14 @@
     coupe: 'Купэ',
   };
 
+  // Единицы измерений
+  const CHARS_SUFFIXES = {
+    area: ' м<sup>2</sup>',
+    'ram-value': ' Гб',
+    'screen-size': '<sup>″</sup>',
+    'matrix-resolution': ' МП',
+  };
+
   const products = (await fetchJson(DATA_URL)).products;
   const resultsList = document.querySelector('.results__list');
   const favTemplate = document.getElementById('fav-button').content.children[0];
@@ -223,13 +228,13 @@
   const popup = document.querySelector('.popup');
   const popupClose = popup.querySelector('.popup__close');
 
-  const makeElement = (tag, className, text) => {
+  const makeElement = (tag, className, html) => {
     const el = document.createElement(tag);
     if (className) {
       el.className = className;
     }
-    if (text) {
-      el.textContent = text;
+    if (html) {
+      el.innerHTML = html;
     }
     return el;
   }
