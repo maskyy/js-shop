@@ -6,6 +6,8 @@
       return data;
   }
 
+  const zip = (...rows) => [...rows[0]].map((_, c) => rows.map(row => row[c]));
+
   const initMap = () => {
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
@@ -212,8 +214,8 @@
   const FILTER_CATEGORIES = ['estate', 'camera', 'laptop', 'car'];
   const CATEGORY_TRANSLATIONS = {
     Недвижимость: 'estate',
-    Ноутбук: 'laptop',
     Фотоаппарат: 'camera',
+    Ноутбук: 'laptop',
     Автомобиль: 'car',
   };
   const SLIDER_SETTINGS = {
@@ -435,10 +437,6 @@
     });
   }
 
-  const sortProducts = () => {
-
-  }
-
   const onSortingChange = e => {
     e.preventDefault();
 
@@ -464,10 +462,44 @@
     updateProductView();
   }
 
+  const getFilters = category => {
+    const price_range = slider.getValue().split(',');
+    let result = Object.fromEntries(zip(['min', 'max'], price_range));
+    result.category = category;
+
+    switch (category) {
+      case 'estate':
+        let type = [];
+        for (const item of ['house', 'flat', 'apartment']) {
+          if (filterForm[item].checked) {
+            type.push(item);
+          }
+        }
+        if (type.length > 0) {
+          result.type = type;
+        }
+        // TODO area, rooms
+        break;
+      case 'camera':
+        // TODO type, resolution, video
+        break;
+      case 'laptop':
+        // TODO type, RAM, diagonal, CPU
+        break;
+      case 'car':
+        // TODO year, transmission, body
+        break;
+    }
+
+    console.log(result);
+    return result;
+  }
+
   const onFilterSubmit = e => {
     e.preventDefault();
 
-    console.log(filterForm.categories);
+    filters = getFilters(filters.category);
+    updateProductView();
   }
 
   const addEvents = () => {
