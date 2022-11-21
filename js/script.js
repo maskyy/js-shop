@@ -132,16 +132,6 @@
     popup.classList.remove('popup--active');
   }
 
-  const mySlider = new rSlider({
-    target: '#sampleSlider',
-    values: {min: 10000, max: 1000000},
-    range: true,
-    tooltip: true,
-    scale: true,
-    labels: false,
-    step: 10000
-  });
-
   const DATA_URL = 'https://main-shop-fake-server.herokuapp.com/db';
   const MAX_PHOTOS = 5;
   const CURRENCY_FORMAT = new Intl.NumberFormat('ru-RU', {
@@ -226,12 +216,21 @@
     Фотоаппарат: 'camera',
     Автомобиль: 'car',
   };
+  const SLIDER_SETTINGS = {
+    target: '#sampleSlider',
+    values: {min: 9000, max: 30000000},
+    range: true,
+    tooltip: true,
+    scale: true,
+    labels: false,
+    step: 10000,
+    width: 280,
+  };
 
   const products = (await fetchJson(DATA_URL)).products;
   const resultsList = document.querySelector('.results__list');
   const favTemplate = document.getElementById('fav-button').content.children[0];
   const map = L.map('map');
-  let mapMarker;
 
   const popup = document.querySelector('.popup');
   const popupClose = popup.querySelector('.popup__close');
@@ -244,8 +243,10 @@
     return filterForm.querySelector('.filter__' + c);
   });
 
+  let mapMarker;
+  let slider = new rSlider(SLIDER_SETTINGS);
   // Ключи для фильтрации
-  let filters = {};
+  let filters = {category: 'all'};
   let sorting = 'popular';
   let showFavourites = false;
 
@@ -457,11 +458,8 @@
       }
     });
   
-    if (current === 'all') {
-      delete filters.category;
-    } else {
-      filters.category = current;
-    }
+    filters.category = current;
+    updateSlider(current);
     updateProductView();
   }
 
@@ -480,19 +478,46 @@
     filterSubmit.addEventListener('click', onFilterSubmit);
   }
 
-  const updateProductView = () => {
+  const getProductsByCategory = category => {
     let result = products;
-
-    if (filters.hasOwnProperty('category')) {
-      console.log(filters.category);
-      result = products.filter(x => filters.category === CATEGORY_TRANSLATIONS[x.category]);
+    if (category !== 'all') {
+      result = result.filter(x => category === CATEGORY_TRANSLATIONS[x.category]);
     }
+    return result;
+  }
+
+  const getSliderStep = category => {
+    if (category === 'estate' || category === 'car') {
+      return 10000;
+    }
+    return 1000;
+  }
+
+  const updateSlider = category => {
+    const items = getProductsByCategory(category);
+    const prices = items.map(x => x.price);
+    const range = {
+      min: Math.min.apply(null, prices),
+      max: Math.max.apply(null, prices),
+    };
+    let settings = SLIDER_SETTINGS;
+    settings.values = range;
+    settings.step = getSliderStep(category);
+
+    slider.destroy();
+    slider = new rSlider(settings);
+  }
+
+  const updateProductView = () => {
+    let result = getProductsByCategory(filters.category);
+
     showProducts(result.slice(0, DEFAULT_COUNT));
   }
 
   const run = () => {
     initMap();
     addEvents();
+
     updateProductView();
   }
 

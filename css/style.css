@@ -17,3 +17,8 @@
 @import "blocks/gallery.css";
 @import "blocks/chars.css";
 @import "blocks/seller.css";
+
+/* hacks */
+.rs-container {
+    margin: 32px auto 0;
+}
