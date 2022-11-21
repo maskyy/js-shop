@@ -4,7 +4,7 @@
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <link rel="stylesheet" href="./css/rSlider.min.css"/>
+      <link rel="stylesheet" href="./css/rSlider.min.css">
       <link rel="stylesheet" href="css/style.css">
       <link rel="preload" href="fonts/Montserrat-Medium.woff2" as="font">
       <link rel="preload" href="fonts/Montserrat-SemiBold.woff2" as="font">
@@ -13,7 +13,7 @@
       <!-- Leaflet -->
       <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.2/dist/leaflet.css"
       integrity="sha256-sA+zWATbFveLLNqWO2gtiw3HL/lh1giY/Inf1BJ0z14="
-      crossorigin=""/>
+      crossorigin="">
       <script src="https://unpkg.com/leaflet@1.9.2/dist/leaflet.js"
       integrity="sha256-o9N1jGDZrf5tS+Ft4gbIK7mYMipq9lqpVJ91xHSyKhg="
       crossorigin=""></script>
@@ -53,7 +53,7 @@
                 </div>
                 <div class="filter__range">
                   <label for="range">Цена, ₽</label>
-                  <input type="text" id="sampleSlider" />
+                  <input type="text" id="range">
                 </div>
                 <div class="filter__estate">
                   <fieldset class="filter__type filter__type--estate">
@@ -81,7 +81,7 @@
                     <legend>Количество комнат</legend>
                     <ul class="filter__ram-list">
                       <li class="filter__radiobuttons-item">
-                        <input class="visually-hidden" type="radio" name="rooms" value="any" id="any_room">
+                        <input class="visually-hidden" type="radio" name="rooms" value="any" id="any_room" checked>
                         <label for="any_room">Любое</label>
                       </li>
                       <li class="filter__radiobuttons-item">
@@ -112,8 +112,8 @@
                     <legend>Тип фотоаппарата</legend>
                     <ul class="filter__checkboxes-list filter__checkboxes-list--camera">
                       <li class="filter__checkboxes-item">
-                        <input class="visually-hidden" type="checkbox" name="camera-type" value="slr" id="mirror">
-                        <label for="mirror">Зеркальный</label>
+                        <input class="visually-hidden" type="checkbox" name="camera-type" value="slr" id="slr">
+                        <label for="slr">Зеркальный</label>
                       </li>
                       <li class="filter__checkboxes-item">
                         <input class="visually-hidden" type="checkbox" name="camera-type" value="digital" id="digital">
@@ -128,11 +128,11 @@
                   <div class="filter__select-wrapper filter__select-wrapper--min-resolution">
                     <label for="resolution-matrix">Минимальное разрешение матрицы</label>
                     <select id="resolution-matrix" name="resolution-matrix">
-                      <option value="1mp" selected>1 МП</option>
-                      <option value="3mp">3 МП</option>
-                      <option value="5mp">5 МП</option>
-                      <option value="7mp">7 МП</option>
-                      <option value="10mp">10 МП</option>
+                      <option value="1" selected>1 МП</option>
+                      <option value="3">3 МП</option>
+                      <option value="5">5 МП</option>
+                      <option value="7">7 МП</option>
+                      <option value="10">10 МП</option>
                     </select>
                     <svg width="14" height="8" viewBox="0 0 14 8" xmlns="http://www.w3.org/2000/svg">
                       <path fill-rule="evenodd" clip-rule="evenodd" d="M0.292893 0.292893C0.683417 -0.0976311 1.31658 -0.0976311 1.70711 0.292893L7 5.58579L12.2929 0.292893C12.6834 -0.0976311 13.3166 -0.0976311 13.7071 0.292893C14.0976 0.683417 14.0976 1.31658 13.7071 1.70711L7.70711 7.70711C7.31658 8.09763 6.68342 8.09763 6.29289 7.70711L0.292893 1.70711C-0.0976311 1.31658 -0.0976311 0.683417 0.292893 0.292893Z" />
@@ -158,7 +158,7 @@
                     <ul class="filter__checkboxes-list filter__checkboxes-list--laptop-ram">
                       <li class="filter__checkboxes-item">
                         <input class="visually-hidden" type="checkbox" name="laptop-type" value="ultrabook" id="ultrabook">
-                        <label for="ultra">Ультрабук</label>
+                        <label for="ultrabook">Ультрабук</label>
                       </li>
                       <li class="filter__checkboxes-item">
                         <input class="visually-hidden" type="checkbox" name="laptop-type" value="home" id="home">
@@ -174,7 +174,7 @@
                     <legend>Минимальный объем оперативной памяти</legend>
                       <ul class="filter__radiobuttons-list">
                         <li class="filter__radiobuttons-item">
-                          <input class="visually-hidden" type="radio" name="ram" value="any" id="any_ram">
+                          <input class="visually-hidden" type="radio" name="ram" value="any" id="any_ram" checked>
                           <label for="any_ram">Любой</label>
                         </li>
                         <li class="filter__radiobuttons-item">
@@ -282,7 +282,7 @@
                         </li>
                         <li class="filter__checkboxes-item">
                           <input class="visually-hidden" type="checkbox" name="car-body" value="suv" id="suv">
-                          <label for="jeep">Внедорожник</label>
+                          <label for="suv">Внедорожник</label>
                         </li>
                         <li class="filter__checkboxes-item">
                           <input class="visually-hidden" type="checkbox" name="car-body" value="cupe" id="cupe">

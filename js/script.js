@@ -219,7 +219,7 @@
     Автомобиль: 'car',
   };
   const SLIDER_SETTINGS = {
-    target: '#sampleSlider',
+    target: '#range',
     values: {min: 9000, max: 30000000},
     range: true,
     tooltip: true,
@@ -462,32 +462,66 @@
     updateProductView();
   }
 
+  const getCheckedTypes = types => {
+    let result = [];
+    for (const t of types) {
+      if (filterForm[t].checked) {
+        result.push(t);
+      }
+    }
+    return result;
+  }
+
+  const addTypeFilter = (types, filters, key = 'type') => {
+    const checked_types = getCheckedTypes(types);
+    if (checked_types.length > 0) {
+      filters[key] = checked_types;
+    }
+  }
+
+  const addOptionFilter = (name, filters, key = name) => {
+    const value = filterForm[name].value;
+    if (value && value !== 'any') {
+      filters[key] = value;
+    }
+  }
+
   const getFilters = category => {
-    const price_range = slider.getValue().split(',');
+    const price_range = slider.getValue().split(',').map(x => x - 0);
     let result = Object.fromEntries(zip(['min', 'max'], price_range));
     result.category = category;
 
     switch (category) {
       case 'estate':
-        let type = [];
-        for (const item of ['house', 'flat', 'apartment']) {
-          if (filterForm[item].checked) {
-            type.push(item);
-          }
+        addTypeFilter(['house', 'flat', 'apartment'], result);
+        const area = filterForm.square.value;
+        if (area && area > 0) {
+          result.area = area - 0;
         }
-        if (type.length > 0) {
-          result.type = type;
-        }
-        // TODO area, rooms
+        addOptionFilter('rooms', result, 'rooms-count');
         break;
       case 'camera':
         // TODO type, resolution, video
+        addTypeFilter(['slr', 'digital', 'mirrorless'], result);
+        addOptionFilter('resolution-matrix', result, 'matrix-resolution');
+        result['matrix-resolution'] -= 0;
+        addOptionFilter('resolution-video', result, 'supporting');
         break;
       case 'laptop':
         // TODO type, RAM, diagonal, CPU
+        addTypeFilter(['ultrabook', 'home', 'gaming'], result);
+        addOptionFilter('ram', result, 'ram-value');
+        result['ram-value'] -= 0;
+        addOptionFilter('diagonal', result, 'screen-size');
+        result['screen-size'] -= 0;
+        addTypeFilter(['i3', 'i5', 'i7'], result, 'cpu-type');
         break;
       case 'car':
         // TODO year, transmission, body
+        addOptionFilter('car_year', result, 'production-year');
+        result['production-year'] -= 0;
+        addOptionFilter('transmission', result);
+        addTypeFilter(['sedan', 'universal', 'hatchback', 'suv', 'cupe'], result, 'body-type');
         break;
     }
 
@@ -512,11 +546,10 @@
   }
 
   const getProductsByCategory = category => {
-    let result = products;
-    if (category !== 'all') {
-      result = result.filter(x => category === CATEGORY_TRANSLATIONS[x.category]);
+    if (category === 'all') {
+      return products;
     }
-    return result;
+    return products.filter(x => category === CATEGORY_TRANSLATIONS[x.category]);
   }
 
   const getSliderStep = category => {
