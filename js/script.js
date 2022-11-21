@@ -444,6 +444,7 @@
 
     sorting = sortingForm['sorting-order'].value;
     showFavourites = sortingForm.favourites.checked;
+    updateProductView();
   }
 
   const onCategoryChange = e => {
@@ -508,8 +509,16 @@
     slider = new rSlider(settings);
   }
 
+  const priceSort = (lhs, rhs) => lhs.price > rhs.price ? 1 : -1;
+  const dateSort = (lhs, rhs) => lhs['publish-date'] < rhs['publish-date'] ? 1 : -1;
+
   const updateProductView = () => {
     let result = getProductsByCategory(filters.category);
+    if (sorting === 'cheap') {
+      result.sort(priceSort);
+    } else if (sorting === 'new') {
+      result.sort(dateSort);
+    }
 
     showProducts(result.slice(0, DEFAULT_COUNT));
   }
