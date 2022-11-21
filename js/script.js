@@ -432,6 +432,14 @@
 
   const showProducts = results => {
     resultsList.innerHTML = '';
+
+    if (results.length === 0) {
+      const li = makeElement('li', 'results__item',
+        'Мы не нашли товары по вашему запросу. Попробуйте поменять фильтры настройки объявлений в блоке слева');
+      resultsList.appendChild(li);
+      return;
+    }
+
     results.forEach((r, i) => {
       resultsList.appendChild(addProduct(r, i));
     });
@@ -448,17 +456,17 @@
   const onCategoryChange = e => {
     e.preventDefault();
 
-    const current = categorySelect.value;
+    const category = categorySelect.value;
     categoryElements.forEach(el => {
-      if (el.classList.contains('filter__' + current)) {
+      if (el.classList.contains('filter__' + category)) {
         el.classList.remove('hidden');
       } else {
         el.classList.add('hidden');
       }
     });
-  
-    filters.category = current;
-    updateSlider(current);
+
+    filters = {category};
+    updateSlider(category);
     updateProductView();
   }
 
@@ -570,11 +578,73 @@
     slider = new rSlider(settings);
   }
 
+  const checkFilter = (key, value, filters) => {
+        // Фильтра на ключ нет
+        if (!(key in filters)) {
+          return true;
+        }
+
+        // Пропущенные данные
+        if (value === '-') {
+          return false;
+        }
+
+        const rule = filters[key];
+        // Массив - проверка на вхождение
+        if (rule instanceof Array) {
+          return rule.includes(value);
+        }
+
+        // Особые случаи...
+        switch (key) {
+          // Проверка чисел
+          case 'area':
+          case 'ram-value':
+          case 'screen-size':
+          case 'matrix-resolution':
+          case 'production-year':
+            return value > rule;
+          // 5+ комнат - принимать 5 и больше, иначе равенство
+          case 'rooms-count':
+            if (rule === '5+') {
+              return value >= 5;
+            }
+            // fallthrough
+          // По умолчанию. Проверка на === с опцией
+          default:
+            return value === rule;
+        }
+  }
+
+  const filterProducts = () => {
+    const f = filters;
+    let data = getProductsByCategory(filters.category);
+    let missingData = [];
+    data = data.filter(item => {
+      if (f.hasOwnProperty('min') && item.price < f.min) {
+        return false;
+      }
+      if (f.hasOwnProperty('max') && item.price > f.max) {
+        return false;
+      }
+      for (const [k, v] of Object.entries(item.filters)) {
+        if (!checkFilter(k, v, f)) {
+          if (v === '-') {
+            missingData.push(item);
+          }
+          return false;
+        }
+      }
+      return true;
+    });
+    return data.concat(missingData);
+  }
+
   const priceSort = (lhs, rhs) => lhs.price > rhs.price ? 1 : -1;
   const dateSort = (lhs, rhs) => lhs['publish-date'] < rhs['publish-date'] ? 1 : -1;
 
   const updateProductView = () => {
-    let result = getProductsByCategory(filters.category);
+    let result = filterProducts();
     if (sorting === 'cheap') {
       result.sort(priceSort);
     } else if (sorting === 'new') {
