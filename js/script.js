@@ -120,10 +120,10 @@
     updateChars(product);
   }
 
-  const openPopup = (e, index) => {
+  const openPopup = (e, product) => {
     e.preventDefault();
 
-    updatePopup(products[index]);
+    updatePopup(product);
     popup.classList.add('popup--active');
   }
 
@@ -220,6 +220,12 @@
   };
   const DEFAULT_COUNT = 7;
   const FILTER_CATEGORIES = ['estate', 'camera', 'laptop', 'car'];
+  const CATEGORY_TRANSLATIONS = {
+    Недвижимость: 'estate',
+    Ноутбук: 'laptop',
+    Фотоаппарат: 'camera',
+    Автомобиль: 'car',
+  };
 
   const products = (await fetchJson(DATA_URL)).products;
   const resultsList = document.querySelector('.results__list');
@@ -240,6 +246,8 @@
 
   // Ключи для фильтрации
   let filters = {};
+  let sorting = 'popular';
+  let showFavourites = false;
 
   const makeElement = (tag, className, html) => {
     const el = document.createElement(tag);
@@ -399,7 +407,7 @@
     return result;
   }
 
-  const addProduct = (data, index) => {
+  const addProduct = data => {
     const li = makeElement('li', 'results__item product');
   
     const fav = createFavButton();
@@ -407,22 +415,22 @@
     const image = makeElement('div', 'product__image');
     addImageElements(data).forEach(el => image.appendChild(el));
     Array.from(image.getElementsByTagName('img')).forEach(el => {
-      el.addEventListener('click', e => openPopup(e, index));
+      el.addEventListener('click', e => openPopup(e, data));
     });
     const content = makeElement('div', 'product__content');
     const publish_date = data['publish-date'];
     addContentElements(data, publish_date).forEach(el => content.appendChild(el));
-    content.querySelector('h3').addEventListener('click', e => openPopup(e, index));
+    content.querySelector('h3').addEventListener('click', e => openPopup(e, data));
 
     [fav, image, content].forEach(el => li.appendChild(el));
 
     return li;
   }
 
-  const showProducts = indices => {
+  const showProducts = results => {
     resultsList.innerHTML = '';
-    indices.forEach(i => {
-      resultsList.appendChild(addProduct(products[i], i));
+    results.forEach((r, i) => {
+      resultsList.appendChild(addProduct(r, i));
     });
   }
 
@@ -433,21 +441,28 @@
   const onSortingChange = e => {
     e.preventDefault();
 
-    console.log(sortingForm['sorting-order'].value);
-    console.log(sortingForm.favourites.checked);
+    sorting = sortingForm['sorting-order'].value;
+    showFavourites = sortingForm.favourites.checked;
   }
 
   const onCategoryChange = e => {
     e.preventDefault();
 
+    const current = categorySelect.value;
     categoryElements.forEach(el => {
-      if (el.classList.contains('filter__' + categorySelect.value)) {
+      if (el.classList.contains('filter__' + current)) {
         el.classList.remove('hidden');
       } else {
         el.classList.add('hidden');
       }
     });
-
+  
+    if (current === 'all') {
+      delete filters.category;
+    } else {
+      filters.category = current;
+    }
+    updateProductView();
   }
 
   const onFilterSubmit = e => {
@@ -465,10 +480,20 @@
     filterSubmit.addEventListener('click', onFilterSubmit);
   }
 
+  const updateProductView = () => {
+    let result = products;
+
+    if (filters.hasOwnProperty('category')) {
+      console.log(filters.category);
+      result = products.filter(x => filters.category === CATEGORY_TRANSLATIONS[x.category]);
+    }
+    showProducts(result.slice(0, DEFAULT_COUNT));
+  }
+
   const run = () => {
     initMap();
-    showProducts(Array.from({length: DEFAULT_COUNT}, (_, i) => i));
     addEvents();
+    updateProductView();
   }
 
   console.log(products);
