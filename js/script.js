@@ -218,6 +218,8 @@
     'screen-size': '<sup>″</sup>',
     'matrix-resolution': ' МП',
   };
+  const DEFAULT_COUNT = 7;
+  const FILTER_CATEGORIES = ['estate', 'camera', 'laptop', 'car'];
 
   const products = (await fetchJson(DATA_URL)).products;
   const resultsList = document.querySelector('.results__list');
@@ -227,6 +229,17 @@
 
   const popup = document.querySelector('.popup');
   const popupClose = popup.querySelector('.popup__close');
+
+  const sortingForm = document.querySelector('.sorting__form');
+  const filterForm = document.querySelector('.filter__form');
+  const categorySelect = document.getElementById('categories');
+  const filterSubmit = filterForm.querySelector('.filter__button');
+  const categoryElements = FILTER_CATEGORIES.map(c => {
+    return filterForm.querySelector('.filter__' + c);
+  });
+
+  // Ключи для фильтрации
+  let filters = {};
 
   const makeElement = (tag, className, html) => {
     const el = document.createElement(tag);
@@ -406,13 +419,58 @@
     return li;
   }
 
-  const test = () => {
+  const showProducts = indices => {
     resultsList.innerHTML = '';
-    products.forEach((item, i) => resultsList.appendChild(addProduct(item, i)));
+    indices.forEach(i => {
+      resultsList.appendChild(addProduct(products[i], i));
+    });
   }
 
-  popupClose.addEventListener('click', closePopup);
+  const sortProducts = () => {
+
+  }
+
+  const onSortingChange = e => {
+    e.preventDefault();
+
+    console.log(sortingForm['sorting-order'].value);
+    console.log(sortingForm.favourites.checked);
+  }
+
+  const onCategoryChange = e => {
+    e.preventDefault();
+
+    categoryElements.forEach(el => {
+      if (el.classList.contains('filter__' + categorySelect.value)) {
+        el.classList.remove('hidden');
+      } else {
+        el.classList.add('hidden');
+      }
+    });
+
+  }
+
+  const onFilterSubmit = e => {
+    e.preventDefault();
+
+    console.log(filterForm.categories);
+  }
+
+  const addEvents = () => {
+    popupClose.addEventListener('click', closePopup);
+    sortingForm.addEventListener('change', onSortingChange);
+
+    categoryElements.forEach(el => el.classList.add('hidden'));
+    categorySelect.addEventListener('change', onCategoryChange);
+    filterSubmit.addEventListener('click', onFilterSubmit);
+  }
+
+  const run = () => {
+    initMap();
+    showProducts(Array.from({length: DEFAULT_COUNT}, (_, i) => i));
+    addEvents();
+  }
+
   console.log(products);
-  test();
-  initMap();
+  run();
 })();
