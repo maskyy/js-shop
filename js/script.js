@@ -105,6 +105,12 @@
     });
   }
 
+  const updateFavButton = ({name}) => {
+    const galleryFav = popup.querySelector('.gallery__favourite');
+    galleryFav.innerHTML = '';
+    galleryFav.appendChild(createFavButton(name));
+  }
+
   const updatePopup = product => {
     updateItem('.popup__date', formatDate(product['publish-date']));
     updateItem('.popup__title', product.name);
@@ -120,18 +126,21 @@
 
     updateGallery(product);
     updateChars(product);
+    updateFavButton(product);
   }
 
-  const openPopup = (e, product) => {
+  const openPopup = (e, product, fav) => {
     e.preventDefault();
 
     updatePopup(product);
     popup.classList.add('popup--active');
+    mainFav = fav;
   }
 
   const closePopup = e => {
     mapMarker.remove();
     popup.classList.remove('popup--active');
+    mainFav = null;
   }
 
   const DATA_URL = 'https://main-shop-fake-server.herokuapp.com/db';
@@ -260,6 +269,8 @@
 
   let favourites = [];
   let showFavourites = false;
+  // FIXME
+  let mainFav = null;
 
   const makeElement = (tag, className, html) => {
     const el = document.createElement(tag);
@@ -295,16 +306,23 @@
     return many;
   }
 
-  const createFavButton = () => {
+  const createFavButton = name => {
     const fav = favTemplate.cloneNode(true);
-    fav.addEventListener('click', onFavClick);
+    fav.addEventListener('click', e => onFavClick(e, name));
+    if (favourites.includes(name)) {
+      fav.classList.add('fav-add--checked');
+    }
     return fav;
   }
 
-  const onFavClick = e => {
+  const onFavClick = (e, name) => {
     e.preventDefault();
 
-    console.log('aaa');
+    e.currentTarget.classList.toggle('fav-add--checked');
+    if (mainFav) {
+      mainFav.classList.toggle('fav-add--checked');
+    }
+    toggleFavourite(name);
   }
 
   const addImage = (name, photo) => {
@@ -422,17 +440,17 @@
   const addProduct = data => {
     const li = makeElement('li', 'results__item product');
   
-    const fav = createFavButton();
+    const fav = createFavButton(data.name);
   
     const image = makeElement('div', 'product__image');
     addImageElements(data).forEach(el => image.appendChild(el));
     Array.from(image.getElementsByTagName('img')).forEach(el => {
-      el.addEventListener('click', e => openPopup(e, data));
+      el.addEventListener('click', e => openPopup(e, data, fav));
     });
     const content = makeElement('div', 'product__content');
     const publish_date = data['publish-date'];
     addContentElements(data, publish_date).forEach(el => content.appendChild(el));
-    content.querySelector('h3').addEventListener('click', e => openPopup(e, data));
+    content.querySelector('h3').addEventListener('click', e => openPopup(e, data, fav));
 
     [fav, image, content].forEach(el => li.appendChild(el));
 
@@ -689,6 +707,16 @@
       favourites = JSON.parse(localStorage.favourites);
     } else {
       favourites = [];
+    }
+  }
+
+  const arrayDelete = (arr, n) => arr.splice(arr.indexOf(n), 1);
+
+  const toggleFavourite = name => {
+    if (favourites.includes(name)) {
+      arrayDelete(favourites, name);
+    } else {
+      favourites.push(name);
     }
   }
 
