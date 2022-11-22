@@ -232,6 +232,9 @@
     width: 280,
   };
 
+  // Сравнение разрешений видео
+  const SUPPORTING_ORDER = ['hd', 'full-hd', '4K', '5K'];
+
   const products = (await fetchJson(DATA_URL)).products;
   const resultsList = document.querySelector('.results__list');
   const favTemplate = document.getElementById('fav-button').content.children[0];
@@ -598,8 +601,11 @@
           return rule.includes(value);
         }
 
-        // Особые случаи...
+        // Проверка одного значения
         switch (key) {
+          // Фотоаппарат - минимальное разрешение (HD < Full HD и т.д.)
+          case 'supporting':
+            return SUPPORTING_ORDER.indexOf(value) >= SUPPORTING_ORDER.indexOf(rule);
           // Проверка чисел
           case 'area':
           case 'ram-value':
