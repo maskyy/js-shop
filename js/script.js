@@ -177,6 +177,9 @@
     house: 'Дом',
 
     // Ноутбуки
+    ultrabook: 'Ультрабук',
+    home: 'Домашний',
+    gaming: 'Игровой',
     i3: 'Intel Core i3',
     i5: 'Intel Core i5',
     i7: 'Intel Core i7',
@@ -603,7 +606,7 @@
           case 'screen-size':
           case 'matrix-resolution':
           case 'production-year':
-            return value > rule;
+            return value >= rule;
           // 5+ комнат - принимать 5 и больше, иначе равенство
           case 'rooms-count':
             if (rule === '5+') {
@@ -621,21 +624,29 @@
     let data = getProductsByCategory(filters.category);
     let missingData = [];
     data = data.filter(item => {
+      let add = true, missing = false;
+      if (item.price === 0 || isNaN(item.price)) {
+        missing = true;
+      }
       if (f.hasOwnProperty('min') && item.price < f.min) {
-        return false;
+        add = false;
       }
       if (f.hasOwnProperty('max') && item.price > f.max) {
-        return false;
+        add = false;
       }
       for (const [k, v] of Object.entries(item.filters)) {
         if (!checkFilter(k, v, f)) {
           if (v === '-') {
-            missingData.push(item);
+            missing = true;
+            continue;
           }
           return false;
         }
       }
-      return true;
+      if (!add && missing) {
+        missingData.push(item);
+      }
+      return add;
     });
     return data.concat(missingData);
   }
