@@ -237,6 +237,7 @@
 
   const products = (await fetchJson(DATA_URL)).products;
   const resultsList = document.querySelector('.results__list');
+  const resultsInfo = document.querySelector('.results__info');
   const favTemplate = document.getElementById('fav-button').content.children[0];
   const map = L.map('map');
 
@@ -256,6 +257,8 @@
   // Ключи для фильтрации
   let filters = {category: 'all'};
   let sorting = 'popular';
+
+  let favourites = [];
   let showFavourites = false;
 
   const makeElement = (tag, className, html) => {
@@ -436,13 +439,18 @@
     return li;
   }
 
-  const showProducts = results => {
+  const showProducts = (results, favourites = false) => {
     resultsList.innerHTML = '';
+    resultsInfo.classList.add('hidden');
 
     if (results.length === 0) {
-      const li = makeElement('li', 'results__item',
-        'Мы не нашли товары по вашему запросу. Попробуйте поменять фильтры настройки объявлений в блоке слева');
-      resultsList.appendChild(li);
+      if (!favourites) {
+        const li = makeElement('li', 'results__item',
+          'Мы не нашли товары по вашему запросу. Попробуйте поменять фильтры настройки объявлений в блоке слева');
+        resultsList.appendChild(li);
+      } else {
+        resultsInfo.classList.remove('hidden');
+      }
       return;
     }
 
@@ -456,6 +464,7 @@
 
     sorting = sortingForm['sorting-order'].value;
     showFavourites = sortingForm.favourites.checked;
+    toggleFormControls(showFavourites);
     updateProductView();
   }
 
@@ -661,6 +670,10 @@
   const dateSort = (lhs, rhs) => lhs['publish-date'] < rhs['publish-date'] ? 1 : -1;
 
   const updateProductView = () => {
+    if (showFavourites) {
+      showProducts(products.filter(p => favourites.includes(p.name)), true);
+      return;
+    }
     let result = filterProducts();
     if (sorting === 'cheap') {
       result.sort(priceSort);
@@ -671,10 +684,33 @@
     showProducts(result.slice(0, DEFAULT_COUNT));
   }
 
+  const loadFavourites = () => {
+    if (localStorage.getItem('favourites')) {
+      favourites = JSON.parse(localStorage.favourites);
+    } else {
+      favourites = [];
+    }
+  }
+
+  const toggleFormControls = disabled => {
+    const selects = filterForm.getElementsByTagName('select');
+    const inputs = filterForm.getElementsByTagName('input');
+    const sorts = sortingForm.children[0].getElementsByTagName('input');
+    const controls = Array.from(selects).concat(Array.from(inputs), Array.from(sorts));
+    controls.push(filterSubmit);
+
+    for (const el of controls) {
+      el.disabled = disabled;
+    }
+
+    slider.disabled(disabled);
+  }
+
   const run = () => {
     initMap();
     addEvents();
 
+    loadFavourites();
     updateProductView();
   }
 
