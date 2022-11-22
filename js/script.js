@@ -1,13 +1,25 @@
 'use strict';
 (async () => {
+  /**
+   * @param {string} url URL
+   * @returns {string} JSON из ссылки
+   */
   const fetchJson = async url => {
       const response = await fetch(url);
       const data = await response.json();
       return data;
   }
 
+  /**
+   * Аналог zip из Python
+   * @param  {...any} rows [a, b], [c, d]
+   * @returns [[a, c], [b, d]]
+   */
   const zip = (...rows) => [...rows[0]].map((_, c) => rows.map(row => row[c]));
 
+  /**
+   * Инициализация карты Leaflet
+   */
   const initMap = () => {
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
@@ -15,16 +27,30 @@
     }).addTo(map);
   }
 
+  /**
+   * Обновляет текст элемента в попапе
+   * @param {string} selector Селектор
+   * @param {string} text Текстовое содержимое
+   */
   const updateItem = (selector, text) => {
     popup.querySelector(selector).textContent = text;
   }
 
+  /**
+   * Обновляет карту попапа, добавляет метку с адресом
+   * @param {object} product.coordinates Координаты
+   * @param {string} address Адрес
+   */
   const updateMap = ({coordinates}, address) => {
     map.setView(coordinates, 15);
     mapMarker = L.marker(coordinates).addTo(map);
     mapMarker.bindPopup(address);
   }
 
+  /**
+   * Выбирает иконку для рейтинга продавца
+   * @param {number} rating Рейтинг продавца
+   */
   const updateSellerIcon = rating => {
     const seller = popup.querySelector('.seller');
     const levels = {
@@ -39,6 +65,14 @@
     }
   }
 
+  /**
+   * Создаёт картинку для попапа
+   * @param {string} alt Название
+   * @param {string} src Ссылка на картинку
+   * @param {number} width Ширина
+   * @param {number} height Высота
+   * @returns {HTMLElement} Элемент
+   */
   const addPopupImage = (alt, src, width, height) => {
     const img = document.createElement('img');
     setAttributes(img, {
@@ -50,6 +84,12 @@
     return img;
   }
 
+  /**
+   * Выбирает активное фото в попапе
+   * @param {Event} e 
+   * @param {Array<HTMLElement>} items Массив фото
+   * @param {HTMLElement} main Большое фото
+   */
   const selectPopupImage = (e, items, main) => {
     e.preventDefault();
 
@@ -59,6 +99,10 @@
     main.src = img.src;
   }
 
+  /**
+   * Обновляет галерею продукта
+   * @param {object} product Продукт
+   */
   const updateGallery = ({name, photos}) => {
     const mainContainer = popup.querySelector('.gallery__main-pic');
     const gallery = popup.querySelector('.gallery__list');
@@ -82,6 +126,12 @@
     });
   }
 
+  /**
+   * Добавляет пункт хар-ки продукта
+   * @param {string} name Название хар-ки
+   * @param {string} value Значение
+   * @returns {HTMLElement} Элемент
+   */
   const addCharItem = (name, value) => {
     const li = makeElement('li', 'chars__item');
     li.appendChild(makeElement('div', 'chars__name', name));
@@ -89,11 +139,14 @@
     return li;
   }
 
+  /**
+   * Обновляет характеристики продукта
+   * @param {object} product Продукт
+   */
   const updateChars = ({filters}) => {
-    console.log(filters);
-
     const chars = popup.querySelector('.chars');
     chars.innerHTML = '';
+
     Object.entries(filters).forEach(([k, v]) => {
       if (v === '-') {
         return;
@@ -105,12 +158,20 @@
     });
   }
 
+  /**
+   * Пересоздаёт кнопку избранного в попапе
+   * @param {object} product Продукт
+   */
   const updateFavButton = ({name}) => {
     const galleryFav = popup.querySelector('.gallery__favourite');
     galleryFav.innerHTML = '';
     galleryFav.appendChild(createFavButton(name));
   }
 
+  /**
+   * Обновляет данные в попапе
+   * @param {object} product Объявление
+   */
   const updatePopup = product => {
     updateItem('.popup__date', formatDate(product['publish-date']));
     updateItem('.popup__title', product.name);
@@ -129,6 +190,12 @@
     updateFavButton(product);
   }
 
+  /**
+   * Открытие попапа
+   * @param {Event} e 
+   * @param {object} product Текущее объявление
+   * @param {HTMLElement} fav Кнопка избранного в карточке
+   */
   const openPopup = (e, product, fav) => {
     e.preventDefault();
 
@@ -137,6 +204,10 @@
     mainFav = fav;
   }
 
+  /**
+   * Закрытие попапа
+   * @param {Event} e 
+   */
   const closePopup = e => {
     mapMarker.remove();
     popup.classList.remove('popup--active');
@@ -272,6 +343,13 @@
   // FIXME
   let mainFav = null;
 
+  /**
+   * Хелпер для document.createElement
+   * @param {string} tag Тег
+   * @param {string} className Имя класса
+   * @param {string} html innerHTML 
+   * @returns {HTMLElement} Элемент
+   */
   const makeElement = (tag, className, html) => {
     const el = document.createElement(tag);
     if (className) {
@@ -283,12 +361,25 @@
     return el;
   }
 
+  /**
+   * Ставит элементу список атрибутов
+   * @param {HTMLElement} el Элемент
+   * @param {object} attributes Атрибуты
+   */
   const setAttributes = (el, attributes) => {
     for (const k in attributes) {
         el.setAttribute(k, attributes[k]);
     }
   }
 
+  /**
+   * Склоняет сущестительные с числительными
+   * @param {number} number Кол-во
+   * @param {string} one Одна штука
+   * @param {string} two Две штуки
+   * @param {string} many Много штук
+   * @returns Подходящий вариант
+   */
   const getPlural = (number, one, two, many) => {
     number = Math.floor(number);
     const mod10 = number % 10, mod100 = number % 100;
@@ -306,6 +397,11 @@
     return many;
   }
 
+  /**
+   * Создаёт кнопку для добавления в избранные
+   * @param {string} name Название объявления
+   * @returns {HTMLElement}
+   */
   const createFavButton = name => {
     const fav = favTemplate.cloneNode(true);
     fav.addEventListener('click', e => onFavClick(e, name));
@@ -315,6 +411,11 @@
     return fav;
   }
 
+  /**
+   * Обрабатывает добавление в избранные и удаление из них
+   * @param {Event} e 
+   * @param {string} name Название объявления
+   */
   const onFavClick = (e, name) => {
     e.preventDefault();
 
@@ -325,6 +426,12 @@
     toggleFavourite(name);
   }
 
+  /**
+   * Создаёт картинку для карточки
+   * @param {string} name Название продукта
+   * @param {string} photo Ссылка на фото
+   * @returns {HTMLElement} Элемент
+   */
   const addImage = (name, photo) => {
     const img = makeElement('img', 'hidden');
     setAttributes(img, {
@@ -335,6 +442,13 @@
     return img;
   }
 
+  /**
+   * Переключает картинки в карточке
+   * @param {Event} e 
+   * @param {number} active Номер активного фото
+   * @param {Array<HTMLElement>} photos Элементы фото
+   * @param {number} len Длина массива фото (FIXME)
+   */
   const onNavItemOver = (e, active, photos, len) => {
     e.preventDefault();
 
@@ -342,6 +456,10 @@
     photos[active].classList.remove('hidden');
   }
 
+  /**
+   * Подсвечивает текущий элемент навигации
+   * @param {Event} e 
+   */
   const highlightNavItem = e => {
     if (e.target.tagName !== 'SPAN') {
       return;
@@ -353,6 +471,11 @@
     item.classList.add('product__navigation-item--active');
   }
 
+  /**
+   * Создаёт навигацию (для >1 картинки)
+   * @param {Array<HTMLElement} photoElements Картинки для показа
+   * @returns {HTMLElement} Навигация
+   */
   const addNavigation = photoElements => {
     const navigation = makeElement('div', 'product__image-navigation');
     const photosLen = photoElements.length;
@@ -368,6 +491,11 @@
     return navigation;
   }
 
+  /**
+   * Создаёт элементы для добавления в галерею карточки
+   * @param {object} param0 Объявление
+   * @returns {Array<HTMLElement>} Элементы
+   */
   const addImageElements = ({name, photos}) => {
     const result = [];
     photos.slice(0, MAX_PHOTOS).forEach(p => result.push(addImage(name, p)));
@@ -391,8 +519,18 @@
     return result;
   }
 
+  /**
+   * Форматирует цену 
+   * @param {number} price Цена
+   * @returns Цена, р.
+   */
   const formatPrice = price => CURRENCY_FORMAT.format(price);
 
+  /**
+   * Форматирует адрес для карточки (город, улица)
+   * @param {object} address Адрес
+   * @returns {string} Город[, улица]
+   */
   const formatAddress = address => {
     let result = address.city;
     if (address.street) {
@@ -401,6 +539,11 @@
     return result;
   }
 
+  /**
+   * Форматирует время для продуктов
+   * @param {string} timestamp UNIX-время
+   * @returns {string} Отформатированное время
+   */
   const formatDate = timestamp => {
     const dayDiff = (Date.now() - timestamp) / (24 * 60 * 60 * 1000);
     if (dayDiff < 1) {
@@ -418,6 +561,12 @@
     return fullDate;
   }
 
+  /**
+   * Создаёт элементы для добавления в .product__content
+   * @param {object} product Объявление
+   * @param {string} date product['publish-date']
+   * @returns {Array<HTMLElement>} Элементы
+   */
   const addContentElements = ({name, price, address}, date) => {
     const result = [];
     result.push(makeElement('h3', 'product__title'));
@@ -437,6 +586,11 @@
     return result;
   }
 
+  /**
+   * Создаёт карточку
+   * @param {object} data Объявление
+   * @returns {HTMLElement} Карточка продукта
+   */
   const addProduct = data => {
     const li = makeElement('li', 'results__item product');
   
@@ -457,6 +611,11 @@
     return li;
   }
 
+  /**
+   * Показывает список объявлений на странице
+   * @param {Array<object>} results Данные объявлений
+   * @param {boolean} favourites Список избранных?
+   */
   const showProducts = (results, favourites = false) => {
     resultsList.innerHTML = '';
     resultsInfo.classList.add('hidden');
@@ -477,6 +636,10 @@
     });
   }
 
+  /**
+   * Изменение сортировки, показ избранных
+   * @param {Event} e 
+   */
   const onSortingChange = e => {
     e.preventDefault();
 
@@ -503,6 +666,11 @@
     updateProductView();
   }
 
+  /**
+   * Возвращает выбранные типы фильтра
+   * @param {Array<string>} types Типы (названия чекбоксов)
+   * @returns {Array<string>} Отмеченные чекбоксы типов
+   */
   const getCheckedTypes = types => {
     let result = [];
     for (const t of types) {
@@ -513,6 +681,12 @@
     return result;
   }
 
+  /**
+   * Добавляет несколько опций для фильтра
+   * @param {Array<string>} types Типы (названия чекбоксов)
+   * @param {object} filters Куда добавлять
+   * @param {string} key Ключ для объявлений
+   */
   const addTypeFilter = (types, filters, key = 'type') => {
     const checked_types = getCheckedTypes(types);
     if (checked_types.length > 0) {
@@ -520,6 +694,12 @@
     }
   }
 
+  /**
+   * Добавляет одну опцию для фильтров, если она указана
+   * @param {string} name Ключ из формы
+   * @param {object} filters Куда добавлять
+   * @param {string} key Ключ для данных объявлений
+   */
   const addOptionFilter = (name, filters, key = name) => {
     let value = filterForm[name].value;
     if (value && value !== 'any') {
@@ -530,6 +710,11 @@
     }
   }
 
+  /**
+   * Собирает критерии для фильтров некоторой категории
+   * @param {string} category Текущая категория
+   * @returns {object} Фильтры
+   */
   const getFilters = category => {
     const price_range = slider.getValue().split(',').map(x => x - 0);
     let result = Object.fromEntries(zip(['min', 'max'], price_range));
@@ -562,10 +747,13 @@
         break;
     }
 
-    console.log(result);
     return result;
   }
 
+  /**
+   * Для фильтрации при клике на "Показать"
+   * @param {Event} e 
+   */
   const onFilterSubmit = e => {
     e.preventDefault();
 
@@ -573,6 +761,9 @@
     updateProductView();
   }
 
+  /**
+   * Добавляет события для работы приложения
+   */
   const addEvents = () => {
     popupClose.addEventListener('click', closePopup);
     sortingForm.addEventListener('change', onSortingChange);
@@ -582,6 +773,10 @@
     filterSubmit.addEventListener('click', onFilterSubmit);
   }
 
+  /**
+   * @param {string} category Текущая категория
+   * @returns Все объявления из категории
+   */
   const getProductsByCategory = category => {
     if (category === 'all') {
       return products;
@@ -589,6 +784,11 @@
     return products.filter(x => category === CATEGORY_TRANSLATIONS[x.category]);
   }
 
+  /**
+   * Выбирает шаг цены для слайдера (10к для дорогих объектов)
+   * @param {string} category Категория
+   * @returns Шаг
+   */
   const getSliderStep = category => {
     if (category === 'estate' || category === 'car') {
       return 10000;
@@ -596,6 +796,10 @@
     return 1000;
   }
 
+  /**
+   * Обновляет диапазон слайдера (мин и макс цены по категории)
+   * @param {string} category Текущая категория
+   */
   const updateSlider = category => {
     const items = getProductsByCategory(category);
     const prices = items.map(x => x.price);
@@ -611,6 +815,13 @@
     slider = new rSlider(settings);
   }
 
+  /**
+   * Проверяет значение фильтра объявления на соответствие критерию
+   * @param {string} key 
+   * @param {any} value 
+   * @param {object} filters Фильтры
+   * @returns Подходит ли значение объявления под критерий?
+   */
   const checkFilter = (key, value, filters) => {
         // Фильтра на ключ нет
         if (!(key in filters)) {
@@ -652,6 +863,10 @@
         }
   }
 
+  /**
+   * Фильтрует объявления по критериям из filters
+   * @returns {Array<object>} Подходящие объявления
+   */
   const filterProducts = () => {
     const f = filters;
     let data = getProductsByCategory(filters.category);
@@ -684,9 +899,24 @@
     return data.concat(missingData);
   }
 
+  /**
+   * Для сортировки по возрастанию цены (от дешёвых к дорогим)
+   * @param {number} lhs 
+   * @param {number} rhs 
+   * @returns -1 или 1
+   */
   const priceSort = (lhs, rhs) => lhs.price > rhs.price ? 1 : -1;
+  /**
+   * Для сортировки по убыванию даты (от новых к старым)
+   * @param {string} lhs 
+   * @param {string} rhs 
+   * @returns -1 или 1
+   */
   const dateSort = (lhs, rhs) => lhs['publish-date'] < rhs['publish-date'] ? 1 : -1;
 
+  /**
+   * Пересоздаёт список карточек
+   */
   const updateProductView = () => {
     if (showFavourites) {
       showProducts(products.filter(p => favourites.includes(p.name)), true);
@@ -702,6 +932,9 @@
     showProducts(result.slice(0, DEFAULT_COUNT));
   }
 
+  /**
+   * Загружает избранные из localStorage
+   */
   const loadFavourites = () => {
     if (localStorage.getItem('favourites')) {
       favourites = JSON.parse(localStorage.favourites);
@@ -710,8 +943,18 @@
     }
   }
 
+  /**
+   * Изменяет arr, удаляя из него n
+   * @param {Array<any>} arr 
+   * @param {any} n Элемент для удаления
+   * @returns Массив с удалённым элементом
+   */
   const arrayDelete = (arr, n) => arr.splice(arr.indexOf(n), 1);
 
+  /**
+   * Добавляет или удаляет объявление из избранных
+   * @param {string} name Имя объявления
+   */
   const toggleFavourite = name => {
     if (favourites.includes(name)) {
       arrayDelete(favourites, name);
@@ -720,6 +963,10 @@
     }
   }
 
+  /**
+   * Переключает блокировку элементов формы
+   * @param {boolean} disabled Заблокировать кнопки?
+   */
   const toggleFormControls = disabled => {
     const selects = filterForm.getElementsByTagName('select');
     const inputs = filterForm.getElementsByTagName('input');
@@ -734,6 +981,9 @@
     slider.disabled(disabled);
   }
 
+  /**
+   * Запуск программы
+   */
   const run = () => {
     initMap();
     addEvents();
@@ -742,6 +992,5 @@
     updateProductView();
   }
 
-  console.log(products);
   run();
 })();
