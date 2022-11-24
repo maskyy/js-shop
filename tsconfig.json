@@ -1,0 +1,13 @@
+{
+  "extends": "./node_modules/gts/tsconfig-google.json",
+  "compilerOptions": {
+    "allowJs": true,
+    "module": "AMD",
+    "lib": ["es5", "es6", "dom"],
+    "rootDir": "./src/",
+    "outFile": "./js/script.js"
+  },
+  "include": [
+    "src/**/*.ts"
+  ]
+}
